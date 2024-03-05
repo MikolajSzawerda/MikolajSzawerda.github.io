@@ -1,15 +1,15 @@
 # Site settings
-title:          Tale
+title:          Research
 description:    "Minimal Jekyll theme for storytellers"
-baseurl:        "/tale"
-url:            "https://chesterhow.github.io"
+baseurl:        ""
+url:            "https://mikolajszawerda.github.io"
 
 # Google Analytics
 google_analytics: UA—XXXXXXXX-X
 
 # Author
 author:
-  name:         Chester How
+  name:         Mikołaj Szawerda
   url:          https://chester.how
   email:        chesterhow@gmail.com
 
@@ -17,7 +17,9 @@ author:
 markdown:       kramdown
 include:
   - _pages
-
+kramdown:
+  math_engine: mathjax
+  syntax_highlighter: rouge
 # Assets
 sass:
   sass_dir:     _sass
