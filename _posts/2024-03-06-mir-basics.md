@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "MIR basics"
+title:  "MIR introduction"
 author: "Mikołaj Szawerda"
 tags: MIR
 ---
