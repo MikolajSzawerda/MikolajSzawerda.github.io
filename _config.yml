@@ -1,7 +1,7 @@
 # Site settings
 title:          Research
 description:    "Minimal Jekyll theme for storytellers"
-baseurl:        "/tale"
+baseurl:        "/"
 url:            "https://mikolajszawerda.github.io"
 
 # Google Analytics
