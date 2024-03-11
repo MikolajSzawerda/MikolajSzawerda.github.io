@@ -68,3 +68,27 @@ is to automatically determine the most representative section, which may serve a
 kind of “preview” giving a listener a ﬁrst impression of the song or piece of music.
 
 First, it indicates how well a given segment explains other related segments, and second, it indicates how much of the overall music recording is covered by all these related segments
+
+## WIMU - MIDI
+
+### Hamming distance
+In information theory, the Hamming distance between two strings or vectors of equal length is the number of positions at which the corresponding symbols are different. In other words, it measures the minimum number of substitutions required to change one string into the other
+
+- maestro dataset
+- Byte pair encoding
+- performance RNN
+
+### SimCSE - uczenie kontrastywne
+Contrastive Learning is a deep learning technique for unsupervised representation learning. The goal is to learn a representation of data such that similar instances are close together in the representation space, while dissimilar instances are far apart.
+
+It has been shown to be effective in various computer vision and natural language processing tasks, including image retrieval, zero-shot learning, and cross-modal retrieval. In these tasks, the learned representations can be used as features for downstream tasks such as classification and clustering.
+
+To do so, we can feed these two images(augmented versions of image) into our deep learning model (Big-CNN such as ResNet) to create vector representations for each image. The goal is to train the model to output similar representations for similar images.
+
+#### Zero-shot learning
+One way is to decrease our models’ reliance on labeled data. This is the motivation behind zero-shot learning, in which your model learns how to classify classes that it hasn’t seen before.
+
+Why should the image encoding be as similar as possible to it’s corresponding text encoding? Now that we know what an encoding is and why it’s important to learn good encodings, we can explore why we are forcing the model to make image and text encodings similar.
+
+- Lakh MIDI
+- performance * in music - w kontekście artykulacji
