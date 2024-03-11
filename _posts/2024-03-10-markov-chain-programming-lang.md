@@ -24,13 +24,14 @@ błędy będą wykrywane, tolerowane?, jak będzie wyglądał przykładowy komun
 • zwięzły opis sposobu testowania – podane przykłady testowanych konstrukcji językowych,
 przypadków złożonych, błędnych itp.
 
-**Tytuł**: Interpreter języka generatorów utworów midi
+**Tytuł**: Interpreter języka generatorów melodii midi
 
 **Autor**: Mikołaj Szawerda
 
 ## Opis zakładanej funkcjonalności
 
-Projekt ma na celu stworzenie interpretera języka ogólnego przeznaczenia z dodatkowymi typami i funkcjami umożliwiającymi deklaratywny odczyt i warunkowanie generowanego pliku MIDI. Język będzie udostępniał typy: wysokości nut, czasu trwania nuty, generator melodii deterministyczny i stochastyczny, tworzenie finalnego pliku midi z podanych generatorów.
+Projekt ma na celu stworzenie interpretera języka ogólnego przeznaczenia z dodatkowymi typami i funkcjami umożliwiającymi deklaratywny odczyt i warunkowanie generowanego pliku MIDI. Język będzie udostępniał typy: wysokości nut, czasu trwania nuty, generator melodii deterministyczny i stochastyczny, tworzenie finalnego pliku midi z podanych generatorów. 
+Zakłada się że wejściowe pliki MIDI zawierają w danym czasie pojedynczą nutę.
 
 ## Charakterystyka języka
 
@@ -202,19 +203,19 @@ fun transpose(Pitch a) -> Void {
   a.transpose(1);
 }
 
-print(a); //C#1
+print(transpose(a)); //C#1
 
 fun transpose2(val Pitch a) -> Void {
   a.transpose(1);
 }
 
-print(a); //C#1
+print(transpose2(a)); //C#1
 
 fun transpose3(Pitch a) -> Void {
   a = B3;
 }
 
-print(a); //B3
+print(transpose3(a)); //B3
 
 fun transpose4(const Pitch a) -> Void {
   a = C4; //compilation error
@@ -324,7 +325,9 @@ save c.with([{C1, Q}, Q]).gen(60, 10) "song2.mid";
 |Double|p|IEEE 64b|
 |Bool|p|true,false
 |Unit|p|void - używany do procedur
-|Opt|z|Optional - zastępuje brak nulla
+|Opt[T]|z|Optional - udostepnia lepsze API do wartości null
+|Iter[T]|z|iterator dla kolekcji typy T
+|T[]|z|mutowalna lista
 |Pitch|z|Wysokość nuty, tworzony z zastrzeżonych słów kluczowych
 |Rythm|z|Długość trwania nuty, tworzony z zastrzeżonych słów kluczowych
 |Note|z|Nuta - określona wysokość i długość
@@ -332,8 +335,7 @@ save c.with([{C1, Q}, Q]).gen(60, 10) "song2.mid";
 |Markov|z|impl łańcucha markova, generator stochastyczny
 |Composer|z|builder, określa generatory z których zostanie stworzony Song
 |Song|z|wewnętrznie Motive[], umożliwia zapis do midi
-|Int[],Double[], Bool[]|z|mutowalna lista, iterator
-|Pitch[], Rythm[]
+|Gen|z|Nieskończony Iter[Note]
 |()->T1|z|funkcja anonimowa bez argumentowa
 |(T1)->T2|z|funkcja anonimowa z jednym argumentem
 |(T1, T2)->T3|z|funkcja anonimowa z dwoma argumentami
@@ -348,7 +350,7 @@ save c.with([{C1, Q}, Q]).gen(60, 10) "song2.mid";
 
 #### Iter
 - implementacja iteratora
-- `Iter[T]` where `T in [Int, Double, Bool, Opt, Pitch, Rythm, Note, Motive, Markov, Composer, Song, T[]]`
+- `Iter[T]` where `T in [Int, Double, Bool, Opt, Pitch, Rythm, Note, Motive, Markov, Composer, Song, K[]]`
 - `fun next()->T`, zwraca aktualny element i przechodzi do kolejnego węzła, `panic` gdy empty
 - `fun hasNext()->Bool`
   
@@ -392,12 +394,12 @@ save c.with([{C1, Q}, Q]).gen(60, 10) "song2.mid";
 - generator stochastyczny
 - `fun gen()->Gen`
 - wewnętrznie reprezentowany przez dwa słowniki o typie `Map<Pitch, Pair<Int, List<Pair <Pitch, Int>>>` i `Map<Rythm, Pair<Int, List<Pair <Rythm, Int>>>`, gdzie np `map.get(Pitch.C1).first()` zawiera akumulowaną sumę `map.get(Pitch.C1).second()` 
-- `fun gen(Note initialState)->Gen` - przy utworzeniu generatora macierze zostają skopiowane do iteratora, przy czym każda wartość jest dzielona przez akumulowaną sumę, otrzymując w ten sposób macierz prawdopodobieństwa `Map<Pitch, List<Pair <Pitch, Double>>>`, `hasNext()` zawsze zwraca true, iterator posiada aktualny stan `(Pitch, Rythm)`, wywołanie `next()`, wybiera wiersz z macierzy i zadanymi prawdopodobieństwami losuje stan następny modifkując `(Pitch, Rythm)` w iteratorze (w implementacji złożone typy w strukturach danych oczywiście zostaną zastąpione własnymi typami)
+- `fun gen(Note initialState)->Gen` - przy utworzeniu generatora macierze zostają skopiowane do iteratora, przy czym każda wartość jest dzielona przez akumulowaną sumę, otrzymując w ten sposób macierz prawdopodobieństwa `Map<Pitch, List<Pair <Pitch, Double>>>`, `hasNext()` zawsze zwraca true, iterator posiada aktualny stan `(Pitch, Rythm)`, wywołanie `next()`, wybiera wiersz z macierzy i zadanymi prawdopodobieństwami losuje stan następny modifkując `(Pitch, Rythm)` w iteratorze (w implementacji złożone typy w strukturach danych oczywiście zostaną zastąpione własnymi typami), wywołanie `gen(Note)` rzuca wyjątkiem, gdy z podanego stanu początkowego nie można przejśc do innego - obiekt `Markov` nie został wypełniony/stan początkowy nie pojawił się w wprowadzonych danych
 
 #### Composer
 - pozwala wskazać które generatory będą użyte do stworzenia piosenki - przechowuje referencje
-- `fun with(Motive m) ->Composer` oraz `fun with(Markov m, Note initState)` - zostają appendowani odpowiednio do `List<Motive>` i `List<Pair<Markov, Note>>` w obiekcie
-- `fun gen(Int tempo, Int duration) ->Song` - wewnętrznie dla  przypisanych obiektów do generacji tworzy `List<Gen>`, następnie dla określonego `tempo, duration` określa długość trwania odpowiednich tokenów nut i w pętli z każdego generatora uzyskuje kolejne nuty, finalnie otrzymując `List<List<Note>>` konstruując `Song`
+- `fun with(Motive m) ->Composer` oraz `fun with(Markov m, Note initState)` - zostają dołączeni odpowiednio do `List<Motive>` i `List<Pair<Markov, Note>>` w obiekcie
+- `fun gen(Int tempo, Int duration) -> Song` - wewnętrznie dla  przypisanych obiektów do generacji tworzy `List<Gen>`, następnie dla określonego `tempo, duration` określa długość trwania odpowiednich tokenów nut i w pętli z każdego generatora uzyskuje kolejne nuty, finalnie otrzymując `List<List<Note>>` konstruując `Song`
 
 
 #### Song
@@ -439,186 +441,21 @@ save c.with([{C1, Q}, Q]).gen(60, 10) "song2.mid";
 #### Odczyt
 
 - `with (String, String, ...)` lub `with String` - konieczność przypisania do zmiennej by wskazać typ
+- założenie, że wskazany plik zawiera tylko jedną nutę w danym czasie - przy braku spełnienia założenia brana będzie najdłuższa z nut
 - mając wskazany typ, wewnętrznie interpreter czytając plik:
 
 |Typ|Wynik|
 |-|-|
 |Pitch[]|Przeczyta tylko wysokości nut
+|Rythm[]|Przeczyta tylko długości nut
+|Motive|Utworzy listę nut o wskazanej wysokości i długości
+|Markov|Utworzy listę nut, a następnie przy użyciu `<<` załaduje dane do Markova
 
 - język wspiera operacje wypisania na standardowe wyjście
 
+## Technologie
 
-Język będzie udostępniał:
-- typ wyliczeniowy `Pitch` wysokości nut będący nazwami zastrzeżonymi w języku - `[A-G](#)?[1-7]`
-- typ `Pitch[]` przechowujący sekwencje wysokości nut `Pitch[] a = [C5, D2, E4]`
-- generator deterministyczny- treść generowana będzie pochodziła z sekwencji załadowanej do obiektu
-- generator stochastyczny - treść generowana będzie wynikała z dwóch macierzy prawdopodobieństw przejść(dla melodii i rytmu) pomiędzy stanami, utworzona poprzez załadowanie obiektu (melodia/rytm) i zliczenie wystąpień danego przejścia pomiedzy stanami, oraz podanego stanu początkowego.
+Język: Java 21
+Testowanie: JUnit5, Mockito, assertj
+Zewnętrzne zależności: javax.sound.midi, log4j, lombok
 
-
-
-### Wymagania funkcjonalne
-
-- język jest statycznie silnie typowany
-- zmienne są domyślnie mutowalne
-- język obsługuje podstawowe typy danych i odpowiednio operacje arytmetyczne/logiczne/znakowe
-  - int, long, float, double - operacje: +,-,*,/, ()
-  - bool - &&, ||
-  - string - +, *
-- język obsługuje relację równości, porządku
-- zmienne mogą występować w kontekście globalnym, oraz ograniczone przez zakres {}
-  - obowiązuje przesłanianie zmiennych do najbliższego kontekstu
-- język obługuje instrukcję warunkową if
-- język obługuje instrukcję warunkową for in
-  - iteracja tylko po obiekcie będącym generatorem
-- język pozwala na zdefiniowanie funkcji
-  - typy primitywne przekazywane przez wartość
-  - typy złożone przez referencję
-  - brak możliwości definiowania parametrów domyślnych -> można przeciążać funkcje
-- język zapewnia mechanizm błędów
-  - `throw Exception` - możliwość obsłużenie przez program
-  - `panic Excpetion` - brak możliwości obsłużenia
-- język zapewnia wbudowane typy do zapisu nutowego - możliwość określenia wysokości oraz długości nuty
-  - `Pitch a = Pitch.C1` // [A-G]\d możliwe wartości z góry określone
-  - `Duration a = Duration.E` // {F, H, Q, E, S}
-  - typy posiadają metody typowe dla danego typu - transpose, speed_up
-- język zapewnia możliwość operacji pseudoarytmetycznych na typach muzycznych
-  - dodawanie tworzy listę obiektów
-  - mnożenie Pitch i Duration /list Pitch i Duration efektywnie wykonuje zip i tworzy Motive
-- język zapewnia deterministyczny generatory nut
-  - `Motive b=[{C1, H}, {B1, E}]` //b.gen() przy iteracji zwraca `b[i%len(b)]`
-- język zapewnia stochastyczny generator nut `Markov`
-  - generator posiada dwie macierze prawdopodobieństw przejść pomiędzy stanami - osobne dla wysokości i długości
-  - modyfikacja macierzy odbywa się poprzez operator `<<` - do macierzy zostają dodane wystąpienia danego przejścia np `C1->B1`
-  - `a.gen({C1, H})` zwraca generator stochastyczny, który dla aktualnego stanu losuje z wagami z macierzy stan kolejny
-```
-Motive m = [{C1, H}, {B1, E}]
-Markov a
-a << m
-```
-
-- język zapewnia wewnętrzy mechanizm odczytu i zapisu plików midi
-  - `Motive a = with Motive 'lick.mid'` - parsing pliku `lick.mid` na typ Motive
-  - `Markov b = with Markov ('lick.mid', 'melody.mid')` - parsing plików i wywołanie `b <<  'lick.mid' << 'melody.mid'` 
-- język zapewnia stworzenie piosenki z generatorów nut
-  - wywołanie `to_midi` pobiera kolejne nuty z każdego z podpietych generatorów do osobnych ścieżek, aż zostanie osiągnięta określona długość utworu
-
-```
-Markov a
-Motive b
-//...
-Song s = make_song(125, 60) //tempo and duration
-
-gen a s
-gen b s
-
-s.to_midi("file.mid")
-```
-
-
-### Przykłady kodu
-
-
-
-```
-fun createSnareMachine() -> motive{
-    //[Q] - Q is quoter note pause
-    //[{C1, Q}] - represents Note of Pitch C1 and duration quoter
-    const motive simpleSnare = [Q, {C#5, Q}, Q, {C#5, Q}]
-    const motive doubleSnare = [Q, {C#5, E}, {C#5, E}, Q, {C#5, Q}]
-    motive snareMachine
-    for i in range(4):
-        if(i % 2 == 0){
-            snareMachine += simpleSnare
-        } else {
-            snareMachine += doubleSnare
-        }
-    return snareMachine
-}
-
-fun fractalMelody(motive melody,(motive)->motive genRule, int depth)->motive{
-    if(depth < 0){
-        panic IllegalArgument("Depth cannot be less than 0")
-    }
-    if(depth == 0){
-        return melody
-    }
-    transformedMelody = genRule(melody)
-    return melody + fractalMelody(transformedMelody, genRule, depth - 1)
-}
-
-Markov randomMelody = with Markov "random_melody"
-
-Song song = make_song(125, 60)
-
-gen randomMelody song
-gen createSnareMachine song
-gen fractalMelody([{C5, Q}, {B5, E}, {F1, H}, E], (melody)->melody.transpose(1), 2) song
-
-song.to_midi("song)
-```
-
-```
-motive a = [{C2, Q}, {C4, Q}]
-
-print(a.transpose(1)) //{C#2, Q}, {C#4, Q}
-print(a.speed(2)) //{C#2, E}, {C#4, E}
-
-motive b = [{C1, E}, E] //Note C1, pause
-
-print(a+b) //{C2, Q}, {C4, Q}, {C1, E}, E
-print(-b) //E, {C1, E}
-
-it = a.gen()
-for(i in range(4)){
-    print(it.next())
-} //{C2, Q}, {C4, Q}, {C2, Q}, {C4, Q}
-
-for note in a{
-    print(note)
-}//{C2, Q}, {C4, Q}
-```
-
-```
-Markov a //without filling will produce pause
-
-Pitch b = [C5, C1, D4]
-Duration c = [Q, E, H]
-
-a << b //Make possible to transition from C5 to C1, and from C1 to D4
-a << c
-
-motive d = b*c //Hadamard product, trimmed to min(len(b), len(c))
-melody e = [D4, F5]
-b*c+e //Panic cannot add melody to motive
-b*c+(e+G1)
-```
-
-```
-Markov rockSolo = with Markov ("lick1", "lick2") as rockSoloMarkov{
-    print(rockSoloMarkov)
-    motive lick3 = [{C5, Q}, {B5, E}, {F1, H}, E]
-    rockSoloMarkov << lick3
-
-    motive lick4 = lick3 + {C3, E}
-    
-    motive lick5 = with "lick3"
-
-    rockSoloMarkov << lick4 << lick5
-}
-
-mv rockRythm = with motive "chords"
-
-song = make_song(125)
-
-gen rockSolo song
-gen rockRythm song
-
-song.to_midi("song")
-```
-
-
-### Moduły
-
-- interpreter języka
-- obługa plików midi
-- obluga łańcuchów markova
