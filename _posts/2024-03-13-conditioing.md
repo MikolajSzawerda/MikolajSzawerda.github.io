@@ -1,9 +1,14 @@
 ---
 layout: post
-title:  "Generative models basics"
+title:  "Conditioning research"
 author: "Mikołaj Szawerda"
 tags: GenAI
+excerpt_separator: <!--more-->
 ---
+
+Post where I dump papers with generative conditioned models. Currently: Performance RNN, Music transformer, RAG, Efficient Neural Music Generation
+
+<!--more-->
 
 
 Buzz words

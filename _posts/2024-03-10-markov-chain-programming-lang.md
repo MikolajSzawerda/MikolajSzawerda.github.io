@@ -3,7 +3,14 @@ layout: post
 title:  "Markov programming language"
 author: "Mikołaj Szawerda"
 tags: Software
+excerpt_separator: <!--more-->
+
 ---
+
+Documentation of my markov chains programming language for the purpouse of Compilation Techniques course on WUT
+
+<!--more-->
+
 # Propozycja tematu projektu TKOM
 
 # consider

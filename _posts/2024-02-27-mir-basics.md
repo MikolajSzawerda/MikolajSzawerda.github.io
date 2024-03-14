@@ -3,7 +3,12 @@ layout: post
 title:  "MIR introduction"
 author: "Mikołaj Szawerda"
 tags: MIR
+excerpt_separator: <!--more-->
 ---
+
+Mainly notes taken during reading "Fundamentals of music processing" and WIMU(WUT course)
+
+<!--more-->
 
 Buzz words
 

@@ -3,7 +3,12 @@ layout: post
 title:  "Generative models basics"
 author: "Mikołaj Szawerda"
 tags: GenAI
+excerpt_separator: <!--more-->
 ---
+
+Understanding generative models
+
+<!--more-->
 
 List of common buzz words
 
