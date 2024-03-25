@@ -97,3 +97,18 @@ Why should the image encoding be as similar as possible to it’s corresponding 
 
 - Lakh MIDI
 - performance * in music - w kontekście artykulacji
+
+Digital signals theory
+
+https://brianmcfee.net/dstbook-site/content/intro.html
+
+ThinkDSP
+https://github.com/AllenDowney/ThinkDSP
+
+Parsons code
+
+librosa domyślne downsampluje do 20k
+
+karpathy
+
+SummaryWriter torch.utils.tensorboard
