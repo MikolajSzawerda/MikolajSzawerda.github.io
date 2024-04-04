@@ -206,6 +206,5 @@ Integrating the information on host information into your markdown notes:
 ### Links
 
 - https://github.com/keithhearne/VSTPlugins/tree/master
-- https://developer.apple.com/library/archive/documentation/MusicAudio/Conceptual/AudioUnitProgrammingGuide/Introduction/Introduction.html#//apple_ref/doc/uid/TP40003278-CH1-SW2
 - https://github.com/steinbergmedia/vst3sdk
 - https://learning.oreilly.com/library/view/designing-audio-effect/9780429954313/
