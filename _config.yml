@@ -1,6 +1,6 @@
 # Site settings
 title:          Research
-description:    "Minimal Jekyll theme for storytellers"
+description:    "Hi! I’m Mikołaj, a software engineer intern, student at Warsaw University of Technology, and a passionate musician."
 baseurl:        "/"
 url:            "https://mikolajszawerda.github.io"
 
@@ -10,7 +10,7 @@ google_analytics: UA—XXXXXXXX-X
 # Author
 author:
   name:         Mikołaj Szawerda
-  url:          https://chester.how
+  url:          https://research.mszawerd.dev
   email:        chesterhow@gmail.com
 
 # Build settings
@@ -37,7 +37,7 @@ plugins:
 
 # Permalinks
 permalink:      /:year-:month-:day/:title
-paginate:       10
+paginate:       5
 
 # Excludes
 exclude: [ Gemfile, Gemfile.lock, tale.gemspec ]
